@@ -43,6 +43,33 @@ int main(int argc, char **argv)
 
 	printf("Image size %dx%d\n", width, height);
 
+	// Resize
+	width  = 256;
+	height = 256;
+
+	status = MagickResizeImage(m_wand, width, height, LanczosFilter);
+	if (status == MagickFalse) {
+		ThrowWandException(m_wand);
+		return 1;
+	}
+
+	// Remove color profiles for interoperability with other hashing tools
+	status = MagickProfileImage(m_wand, "*", NULL, 0);
+	if (status == MagickFalse) {
+		ThrowWandException(m_wand);
+		return 1;
+	}
+
+	// Grayscale
+	status = MagickTransformImageColorspace(m_wand, GRAYColorspace);
+	if (status == MagickFalse) {
+		ThrowWandException(m_wand);
+		return 1;
+	}
+
+	// Save to file
+	MagickWriteImage(m_wand, "magick_result.jpg");
+
 	// Clean up
 	if(m_wand) {
 		m_wand = DestroyMagickWand(m_wand);
